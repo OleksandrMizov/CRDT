@@ -11,7 +11,7 @@ const schema = {
   children: { array: 'string' },
   parents: { father: '?string', mother: '?string' },
   militaryVictories: 'counter',
-  campaigns: {
+  wars: {
     object: { string: 'counter' },
   },
 };

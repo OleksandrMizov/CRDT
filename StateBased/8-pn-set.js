@@ -70,24 +70,28 @@ class PNSet {
 // Usage
 
 console.log('Replica 0');
-const set0 = new PNSet(0);
+const set0 = new PNSet({id: 0});
 set0.add('a');
 set0.add('b');
 set0.remove('a');
 console.log({ id0: set0.value });
+console.log(JSON.stringify({ id0: { added: set0.added, removed: set0.removed } }));
+
 
 console.log('Replica 1');
-const set1 = new PNSet(1);
+const set1 = new PNSet({id: 1});
 set1.add('b');
 set1.add('c');
 set1.remove('b');
 console.log({ id1: set1.value });
+console.log(JSON.stringify({ id1: { added: set1.added, removed: set1.removed } }));
+
 
 console.log('Sync');
 set0.merge(set1);
 set1.merge(set0);
-console.log({ id0: { added: set0.added, removed: set0.removed } });
-console.log({ id1: { added: set1.added, removed: set1.removed } });
+console.log(JSON.stringify({ id0: { added: set0.added, removed: set0.removed } }));
+console.log(JSON.stringify({ id1: { added: set1.added, removed: set1.removed } }));
 
 console.log('Get value');
 console.log({ id0: set0.value });
