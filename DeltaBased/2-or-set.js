@@ -2,8 +2,6 @@
 
 const crypto = require('node:crypto');
 
-const init = () => ({ added: {}, removed: {} });
-
 class DeltaORSet {
   #added;
   #removed;
@@ -14,44 +12,36 @@ class DeltaORSet {
   }
 
   add(item, tag = crypto.randomUUID()) {
-    const result = init();
-    const added = this.#added[item];
-    result.added[item] = added ? new Set([...added, tag]) : new Set([tag]);
+    const result = new DeltaORSet();
+    const added = this.#added[item] || [];
+    result.#added[item] = new Set([...added, tag]);
     return result;
   }
 
   remove(item) {
-    const result = init();
+    const result = new DeltaORSet();
     const added = this.#added[item];
 
     if (!added) return result;
 
-    const removed = this.#removed[item];
-    result.removed[item] = removed
-      ? new Set([...removed, ...added])
-      : new Set([...added]);
+    const removed = this.#removed[item] || [];
+    result.#removed[item] = new Set([...removed, ...added]);
 
     return result;
   }
 
   join(delta) {
-    const added = Object.entries(delta.added);
-    for (const [item, tags] of added) {
-      const deltaTags = tags || new Set();
+    for (const [item, tags] of Object.entries(delta.added)) {
+      const added = this.#added[item] || [];
+      this.#added[item] = new Set([...added, ...tags]);
+    }
 
-      const added = this.#added[item];
-      this.#added[item] = added
-        ? new Set([...added, ...deltaTags])
-        : new Set([...deltaTags]);
+    for (const [item, tags] of Object.entries(delta.removed)) {
+      const removed = this.#removed[item] || [];
+      this.#removed[item] = new Set([...removed, ...tags]);
     }
-    const removed = Object.entries(delta.removed);
-    for (const [item, tags] of removed) {
-      const deltaTags = tags || new Set();
-      const removed = this.#removed[item];
-      this.#removed[item] = removed
-        ? new Set([...removed, ...deltaTags])
-        : new Set([...deltaTags]);
-    }
+
+    return this;
   }
 
   get value() {
@@ -79,7 +69,6 @@ class DeltaORSet {
 }
 
 // Usage
-
 console.log('--------------------------------');
 console.log('Delta CRDT OR-Set');
 console.log('--------------------------------');
